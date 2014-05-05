@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-OpenIDE-Module: com.basistech.df.mobile
-OpenIDE-Module-Localizing-Bundle: com/basistech/df/mobile/Bundle.properties
+OpenIDE-Module: OpenMobileForensics
+OpenIDE-Module-Localizing-Bundle: org/sleuthkit/openmobileforensics/Bundle.properties
 OpenIDE-Module-Requires: org.openide.modules.InstalledFileLocator
 OpenIDE-Module-Specification-Version: 1.0
 

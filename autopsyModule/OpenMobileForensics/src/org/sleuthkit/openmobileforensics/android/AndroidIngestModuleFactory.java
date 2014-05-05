@@ -27,7 +27,7 @@
  *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *  OTHER DEALINGS IN THE SOFTWARE. 
  */
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 // The following import is required for the ServiceProvider annotation (see 
 // below) used by the Autopsy ingest framework to locate ingest module 
@@ -88,7 +88,7 @@ import org.sleuthkit.autopsy.ingest.IngestModuleIngestJobSettingsPanel;
  * implementations of most of the IngestModuleFactory methods.
  */
 @ServiceProvider(service = IngestModuleFactory.class) // Sample is discarded at runtime 
-public class MobileIngestModuleFactory implements IngestModuleFactory {
+public class AndroidIngestModuleFactory implements IngestModuleFactory {
 
     private static final String VERSION_NUMBER = "1.0.0";
 
@@ -96,7 +96,7 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
     // factory to use the same display name that is provided to the Autopsy
     // ingest framework by the factory.
     static String getModuleName() {
-        return NbBundle.getMessage(MobileIngestModuleFactory.class, "MobileIngestModuleFactory.moduleName");
+        return NbBundle.getMessage(AndroidIngestModuleFactory.class, "AndroidIngestModuleFactory.moduleName");
     }
 
     /**
@@ -121,7 +121,7 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
      */
     @Override
     public String getModuleDescription() {
-        return NbBundle.getMessage(MobileIngestModuleFactory.class, "MobileIngestModuleFactory.moduleDescription");
+        return NbBundle.getMessage(AndroidIngestModuleFactory.class, "AndroidIngestModuleFactory.moduleDescription");
     }
 
     /**
@@ -185,7 +185,7 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
      */
     @Override
     public IngestModuleIngestJobSettings getDefaultIngestJobSettings() {
-        return new MobileModuleIngestJobSettings();
+        return new AndroidModuleIngestJobSettings();
     }
 
     /**
@@ -220,10 +220,10 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
      */
     @Override
     public IngestModuleIngestJobSettingsPanel getIngestJobSettingsPanel(IngestModuleIngestJobSettings settings) {
-        if (!(settings instanceof MobileModuleIngestJobSettings)) {
-            throw new IllegalArgumentException("Expected settings argument to be instanceof MobileModuleIngestJobSettings");
+        if (!(settings instanceof AndroidModuleIngestJobSettings)) {
+            throw new IllegalArgumentException("Expected settings argument to be instanceof AndroidModuleIngestJobSettings");
         }
-        return new MobileIngestJobSettingsPanel((MobileModuleIngestJobSettings) settings);
+        return new AndroidIngestJobSettingsPanel((AndroidModuleIngestJobSettings) settings);
     }
 
     /**
@@ -269,10 +269,10 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
      */
     @Override
     public DataSourceIngestModule createDataSourceIngestModule(IngestModuleIngestJobSettings settings) {
-        if (!(settings instanceof MobileModuleIngestJobSettings)) {
-            throw new IllegalArgumentException("Expected settings argument to be instanceof MobileModuleIngestJobSettings");
+        if (!(settings instanceof AndroidModuleIngestJobSettings)) {
+            throw new IllegalArgumentException("Expected settings argument to be instanceof AndroidModuleIngestJobSettings");
         }
-        return new MobileDSIngestModule((MobileModuleIngestJobSettings) settings);
+        return new AndroidDSIngestModule((AndroidModuleIngestJobSettings) settings);
     }
 
     /**
@@ -318,9 +318,9 @@ public class MobileIngestModuleFactory implements IngestModuleFactory {
      */
     @Override
     public FileIngestModule createFileIngestModule(IngestModuleIngestJobSettings settings) {
-        if (!(settings instanceof MobileModuleIngestJobSettings)) {
-            throw new IllegalArgumentException("Expected settings argument to be instanceof SampleModuleIngestJobSettings");
+        if (!(settings instanceof AndroidModuleIngestJobSettings)) {
+            throw new IllegalArgumentException("Expected settings argument to be instanceof AndroidModuleIngestJobSettings");
         }
-        return new MobileFIngestModule((MobileModuleIngestJobSettings) settings);
+        return new AndroidFIngestModule((AndroidModuleIngestJobSettings) settings);
     }
 }

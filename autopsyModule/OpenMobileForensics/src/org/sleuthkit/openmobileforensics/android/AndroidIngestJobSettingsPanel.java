@@ -28,7 +28,7 @@
  *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *  OTHER DEALINGS IN THE SOFTWARE. 
  */
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 import org.sleuthkit.autopsy.ingest.IngestModuleIngestJobSettings;
 import org.sleuthkit.autopsy.ingest.IngestModuleIngestJobSettingsPanel;
@@ -36,17 +36,17 @@ import org.sleuthkit.autopsy.ingest.IngestModuleIngestJobSettingsPanel;
 /**
  * UI component used to make per ingest job settings for sample ingest modules.
  */
-public class MobileIngestJobSettingsPanel extends IngestModuleIngestJobSettingsPanel {
+public class AndroidIngestJobSettingsPanel extends IngestModuleIngestJobSettingsPanel {
 
     /**
      * Creates new form SampleIngestModuleIngestJobSettings
      */
-    public MobileIngestJobSettingsPanel(MobileModuleIngestJobSettings settings) {
+    public AndroidIngestJobSettingsPanel(AndroidModuleIngestJobSettings settings) {
         initComponents();
         customizeComponents(settings);
     }
 
-    private void customizeComponents(MobileModuleIngestJobSettings settings) {
+    private void customizeComponents(AndroidModuleIngestJobSettings settings) {
         skipKnownFilesCheckBox.setSelected(settings.skipKnownFiles());
     }
 
@@ -57,7 +57,7 @@ public class MobileIngestJobSettingsPanel extends IngestModuleIngestJobSettingsP
      */
     @Override
     public IngestModuleIngestJobSettings getSettings() {
-        return new MobileModuleIngestJobSettings(skipKnownFilesCheckBox.isSelected());
+        return new AndroidModuleIngestJobSettings(skipKnownFilesCheckBox.isSelected());
     }
 
     /**
@@ -71,7 +71,7 @@ public class MobileIngestJobSettingsPanel extends IngestModuleIngestJobSettingsP
 
         skipKnownFilesCheckBox = new javax.swing.JCheckBox();
 
-        org.openide.awt.Mnemonics.setLocalizedText(skipKnownFilesCheckBox, org.openide.util.NbBundle.getMessage(MobileIngestJobSettingsPanel.class, "MobileIngestJobSettingsPanel.skipKnownFilesCheckBox.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(skipKnownFilesCheckBox, org.openide.util.NbBundle.getMessage(AndroidIngestJobSettingsPanel.class, "AndroidIngestJobSettingsPanel.skipKnownFilesCheckBox.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

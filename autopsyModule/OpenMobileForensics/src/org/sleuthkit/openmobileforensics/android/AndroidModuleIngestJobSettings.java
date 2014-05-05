@@ -28,21 +28,21 @@
  *  OTHER DEALINGS IN THE SOFTWARE. 
  */
 
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 import org.sleuthkit.autopsy.ingest.IngestModuleIngestJobSettings;
 
 /**
  * Ingest job options for sample ingest module instances.
  */
-public class MobileModuleIngestJobSettings implements IngestModuleIngestJobSettings {
+public class AndroidModuleIngestJobSettings implements IngestModuleIngestJobSettings {
     
     private boolean skipKnownFiles = true;
 
-    MobileModuleIngestJobSettings() {
+    AndroidModuleIngestJobSettings() {
     }
 
-    MobileModuleIngestJobSettings(boolean skipKnownFiles) {
+    AndroidModuleIngestJobSettings(boolean skipKnownFiles) {
         this.skipKnownFiles = skipKnownFiles;
     }
 

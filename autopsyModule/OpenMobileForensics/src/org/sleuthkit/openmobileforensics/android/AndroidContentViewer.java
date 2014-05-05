@@ -27,7 +27,7 @@
 *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 *  OTHER DEALINGS IN THE SOFTWARE. 
 */
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 import java.awt.Component;
 import org.openide.nodes.Node;
@@ -45,12 +45,12 @@ import org.sleuthkit.datamodel.TskCoreException;
  * it is compiled each time to ensure that it is compliant with the API.
  */
 // @ServiceProvider(service = DataContentViewer.class)
- class MobileContentViewer extends javax.swing.JPanel implements DataContentViewer  {
+ class AndroidContentViewer extends javax.swing.JPanel implements DataContentViewer  {
 
     /**
      * Creates new form SampleContentViewer
      */
-    public MobileContentViewer() {
+    public AndroidContentViewer() {
         initComponents();
     }
 
@@ -65,7 +65,7 @@ import org.sleuthkit.datamodel.TskCoreException;
 
         jLabel1 = new javax.swing.JLabel();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(MobileContentViewer.class, "MobileContentViewer.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(AndroidContentViewer.class, "AndroidContentViewer.jLabel1.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -136,7 +136,7 @@ import org.sleuthkit.datamodel.TskCoreException;
 
     @Override
     public DataContentViewer createInstance() {
-        return new MobileContentViewer();
+        return new AndroidContentViewer();
     }
 
     @Override

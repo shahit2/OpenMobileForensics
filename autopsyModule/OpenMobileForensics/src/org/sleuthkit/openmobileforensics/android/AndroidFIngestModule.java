@@ -27,7 +27,7 @@
  *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *  OTHER DEALINGS IN THE SOFTWARE. 
  */
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -54,7 +54,7 @@ import org.sleuthkit.datamodel.TskData;
  * module settings, use of a subset of the available ingest services and
  * thread-safe sharing of per ingest job data.
  */
-class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModule {
+class AndroidFIngestModule extends IngestModuleAdapter implements FileIngestModule {
 
     private static final HashMap<Long, Long> artifactCountsForIngestJobs = new HashMap<>();
     private static int attrId = -1;
@@ -62,7 +62,7 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
     private IngestJobContext context = null;
     private static final IngestModuleReferenceCounter refCounter = new IngestModuleReferenceCounter();
 
-    MobileFIngestModule(MobileModuleIngestJobSettings settings) {
+    AndroidFIngestModule(AndroidModuleIngestJobSettings settings) {
         this.skipKnownFiles = settings.skipKnownFiles();
     }
 
@@ -71,7 +71,7 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
         this.context = context;
         refCounter.incrementAndGet(context.getJobId());
 
-        synchronized (MobileFIngestModule.class) {
+        synchronized (AndroidFIngestModule.class) {
             if (attrId == -1) {
                 // For this sample, make a new attribute type to use to post 
                 // results to the blackboard. There are many standard blackboard 
@@ -90,7 +90,7 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
                         attrId = sleuthkitCase.addAttrType("ATTR_SAMPLE", "Sample Attribute");
                     } catch (TskCoreException ex) {
                         IngestServices ingestServices = IngestServices.getInstance();
-                        Logger logger = ingestServices.getLogger(MobileIngestModuleFactory.getModuleName());
+                        Logger logger = ingestServices.getLogger(AndroidIngestModuleFactory.getModuleName());
                         logger.log(Level.SEVERE, "Failed to create blackboard attribute", ex);
                         attrId = -1;
                         throw new IngestModuleException(ex.getLocalizedMessage());
@@ -132,7 +132,7 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
 
             // Make an attribute using the ID for the attribute type that 
             // was previously created.
-            BlackboardAttribute attr = new BlackboardAttribute(attrId, MobileIngestModuleFactory.getModuleName(), count);
+            BlackboardAttribute attr = new BlackboardAttribute(attrId, AndroidIngestModuleFactory.getModuleName(), count);
 
             // Add the to the general info artifact for the file. In a
             // real module, you would likely have more complex data types 
@@ -145,14 +145,14 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
             addToBlackboardPostCount(context.getJobId(), 1L);
 
             // Fire an event to notify any listeners for blackboard postings.
-            ModuleDataEvent event = new ModuleDataEvent(MobileIngestModuleFactory.getModuleName(), ARTIFACT_TYPE.TSK_GEN_INFO);
+            ModuleDataEvent event = new ModuleDataEvent(AndroidIngestModuleFactory.getModuleName(), ARTIFACT_TYPE.TSK_GEN_INFO);
             IngestServices.getInstance().fireModuleDataEvent(event);
 
             return IngestModule.ProcessResult.OK;
 
         } catch (TskCoreException ex) {
             IngestServices ingestServices = IngestServices.getInstance();
-            Logger logger = ingestServices.getLogger(MobileIngestModuleFactory.getModuleName());
+            Logger logger = ingestServices.getLogger(AndroidIngestModuleFactory.getModuleName());
             logger.log(Level.SEVERE, "Error processing file (id = " + file.getId() + ")", ex);
             return IngestModule.ProcessResult.ERROR;
         }
@@ -185,7 +185,7 @@ class MobileFIngestModule extends IngestModuleAdapter implements FileIngestModul
             String msgText = String.format("Posted %d times to the blackboard", filesCount);
             IngestMessage message = IngestMessage.createMessage(
                     IngestMessage.MessageType.INFO,
-                    MobileIngestModuleFactory.getModuleName(),
+                    AndroidIngestModuleFactory.getModuleName(),
                     msgText);
             IngestServices.getInstance().postMessage(message);
         }

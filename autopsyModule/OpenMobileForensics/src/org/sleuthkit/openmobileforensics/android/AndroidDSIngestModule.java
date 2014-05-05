@@ -27,7 +27,7 @@
  *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *  OTHER DEALINGS IN THE SOFTWARE. 
  */
-package com.basistech.df.mobile.Ingest;
+package org.sleuthkit.openmobileforensics.android;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,14 +56,14 @@ import org.sleuthkit.datamodel.TskData;
  * ingest job module settings, use of a subset of the available ingest services
  * and thread-safe sharing of per ingest job data.
  */
-class MobileDSIngestModule extends IngestModuleAdapter implements DataSourceIngestModule {
+class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIngestModule {
 
     private static final HashMap<Long, Long> fileCountsForIngestJobs = new HashMap<>();
     private final boolean skipKnownFiles;
     private IngestJobContext context = null;
     private static final IngestModuleReferenceCounter refCounter = new IngestModuleReferenceCounter();
 
-    MobileDSIngestModule(MobileModuleIngestJobSettings settings) {
+    AndroidDSIngestModule(AndroidModuleIngestJobSettings settings) {
         this.skipKnownFiles = settings.skipKnownFiles();
     }
     
@@ -117,7 +117,7 @@ class MobileDSIngestModule extends IngestModuleAdapter implements DataSourceInge
             
         } catch (TskCoreException ex) {
             IngestServices ingestServices = IngestServices.getInstance();
-            Logger logger = ingestServices.getLogger(MobileIngestModuleFactory.getModuleName());
+            Logger logger = ingestServices.getLogger(AndroidIngestModuleFactory.getModuleName());
             logger.log(Level.SEVERE, "File query failed", ex);
             return IngestModule.ProcessResult.ERROR;
         }
@@ -150,7 +150,7 @@ class MobileDSIngestModule extends IngestModuleAdapter implements DataSourceInge
             String msgText = String.format("Found %d files", filesCount);
             IngestMessage message = IngestMessage.createMessage(
                     IngestMessage.MessageType.DATA,
-                    MobileIngestModuleFactory.getModuleName(),
+                    AndroidIngestModuleFactory.getModuleName(),
                     msgText);
             IngestServices.getInstance().postMessage(message);
         } 
