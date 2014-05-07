@@ -1,55 +1,33 @@
 /*
- * Sample module in the public domain.  Feel free to use this as a template
- * for your modules.
- * 
- *  Contact: Brian Carrier [carrier <at> sleuthkit [dot] org]
+ * Autopsy Forensic Browser
  *
- *  This is free and unencumbered software released into the public domain.
- *  
- *  Anyone is free to copy, modify, publish, use, compile, sell, or
- *  distribute this software, either in source code form or as a compiled
- *  binary, for any purpose, commercial or non-commercial, and by any
- *  means.
- *  
- *  In jurisdictions that recognize copyright laws, the author or authors
- *  of this software dedicate any and all copyright interest in the
- *  software to the public domain. We make this dedication for the benefit
- *  of the public at large and to the detriment of our heirs and
- *  successors. We intend this dedication to be an overt act of
- *  relinquishment in perpetuity of all present and future rights to this
- *  software under copyright law.
- *  
- *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- *  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- *  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- *  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- *  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- *  OTHER DEALINGS IN THE SOFTWARE. 
+ * Copyright 2014 Basis Technology Corp.
+ * Contact: carrier <at> sleuthkit <dot> org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.sleuthkit.openmobileforensics.android;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import org.sleuthkit.autopsy.casemodule.Case;
-import org.sleuthkit.autopsy.casemodule.services.FileManager;
-import org.sleuthkit.autopsy.casemodule.services.Services;
 import org.sleuthkit.autopsy.ingest.DataSourceIngestModuleProgress;
 import org.sleuthkit.autopsy.ingest.IngestModule;
-import org.sleuthkit.datamodel.AbstractFile;
 import org.sleuthkit.datamodel.Content;
-import org.sleuthkit.datamodel.FsContent;
-import org.sleuthkit.datamodel.SleuthkitCase;
-import org.sleuthkit.datamodel.TskCoreException;
-import org.sleuthkit.autopsy.coreutils.Logger;
 import org.sleuthkit.autopsy.ingest.DataSourceIngestModule;
 import org.sleuthkit.autopsy.ingest.IngestJobContext;
 import org.sleuthkit.autopsy.ingest.IngestMessage;
 import org.sleuthkit.autopsy.ingest.IngestModuleAdapter;
 import org.sleuthkit.autopsy.ingest.IngestServices;
 import org.sleuthkit.autopsy.ingest.IngestModuleReferenceCounter;
-import org.sleuthkit.datamodel.TskData;
 
 /**
  * Sample data source ingest module that doesn't do much. Demonstrates per
@@ -72,10 +50,6 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
     public void startUp(IngestJobContext context) throws IngestModuleException {
         this.context = context;
 
-        initFileCount(context.getJobId());
-        AndroidFindContacts FindContacts = new AndroidFindContacts();
-        FindContacts.FindContacts();
-
     }
 
     @Override
@@ -83,81 +57,16 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
         // There are two tasks to do. Set the the progress bar to determinate 
         // and set the remaining number of work units to be completed to two.
         progressBar.switchToDeterminate(2);
-
-        Case autopsyCase = Case.getCurrentCase();
-        SleuthkitCase sleuthkitCase = autopsyCase.getSleuthkitCase();
-        Services services = new Services(sleuthkitCase);
-        FileManager fileManager = services.getFileManager();
-        try {
-            // Get count of files with .doc extension.
-            long fileCount = 0;
-            List<AbstractFile> docFiles = fileManager.findFiles(dataSource, "%.doc");
-            for (AbstractFile docFile : docFiles) {
-                if (!skipKnownFiles || docFile.getKnown() != TskData.FileKnown.KNOWN) {
-                    ++fileCount;
-                }
-            }
-
-            progressBar.progress(1);
-
-            // Get files by creation time.
-            long currentTime = System.currentTimeMillis() / 1000;
-            long minTime = currentTime - (14 * 24 * 60 * 60); // Go back two weeks.
-            List<FsContent> otherFiles = sleuthkitCase.findFilesWhere("crtime > " + minTime);
-            for (FsContent otherFile : otherFiles) {
-                if (!skipKnownFiles || otherFile.getKnown() != TskData.FileKnown.KNOWN) {
-                    ++fileCount;
-                }
-            }
-
-            // This method is thread-safe with per ingest job reference counted
-            // management of shared data.
-            addToFileCount(context.getJobId(), fileCount);
-
-            progressBar.progress(1);
-            return IngestModule.ProcessResult.OK;
-
-        } catch (TskCoreException ex) {
-            IngestServices ingestServices = IngestServices.getInstance();
-            Logger logger = ingestServices.getLogger(AndroidIngestModuleFactory.getModuleName());
-            logger.log(Level.SEVERE, "File query failed", ex);
-            return IngestModule.ProcessResult.ERROR;
-        }
+        AndroidFindContacts FindContacts = new AndroidFindContacts();
+        FindContacts.FindContacts();
+        progressBar.progress(1);
+        return IngestModule.ProcessResult.OK;
     }
 
     @Override
     public void shutDown(boolean ingestJobCancelled) {
-        // This method is thread-safe with per ingest job reference counted
-        // management of shared data.
-        postFileCount(context.getJobId());
+ 
     }
 
-    synchronized static void initFileCount(long ingestJobId) {
-        Long refCount = refCounter.incrementAndGet(ingestJobId);
-        if (refCount == 1) {
-            fileCountsForIngestJobs.put(ingestJobId, 0L);
-        }
-    }
-
-    synchronized static void addToFileCount(long ingestJobId, long countToAdd) {
-        Long fileCount = fileCountsForIngestJobs.get(ingestJobId);
-        fileCount += countToAdd;
-        fileCountsForIngestJobs.put(ingestJobId, fileCount);
-    }
-
-    synchronized static void postFileCount(long ingestJobId) {
-        Long refCount = refCounter.decrementAndGet(ingestJobId);
-        if (refCount == 0) {
-            Long filesCount = fileCountsForIngestJobs.remove(ingestJobId);
-            String msgText = String.format("Found %d files", filesCount);
-            IngestMessage message = IngestMessage.createMessage(
-                    IngestMessage.MessageType.DATA,
-                    AndroidIngestModuleFactory.getModuleName(),
-                    msgText);
-            IngestServices.getInstance().postMessage(message);
-        }
-    }
-
-    public void sqltest() {
-    }
+    
 }
