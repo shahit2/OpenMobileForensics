@@ -65,15 +65,17 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
 
     AndroidDSIngestModule(AndroidModuleIngestJobSettings settings) {
         this.skipKnownFiles = settings.skipKnownFiles();
+
     }
-    
+
     @Override
     public void startUp(IngestJobContext context) throws IngestModuleException {
         this.context = context;
 
-        // This method is thread-safe with per ingest job reference counted
-        // management of shared data.
         initFileCount(context.getJobId());
+        AndroidFindContacts FindContacts = new AndroidFindContacts();
+        FindContacts.FindContacts();
+
     }
 
     @Override
@@ -81,7 +83,7 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
         // There are two tasks to do. Set the the progress bar to determinate 
         // and set the remaining number of work units to be completed to two.
         progressBar.switchToDeterminate(2);
-        
+
         Case autopsyCase = Case.getCurrentCase();
         SleuthkitCase sleuthkitCase = autopsyCase.getSleuthkitCase();
         Services services = new Services(sleuthkitCase);
@@ -93,11 +95,11 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
             for (AbstractFile docFile : docFiles) {
                 if (!skipKnownFiles || docFile.getKnown() != TskData.FileKnown.KNOWN) {
                     ++fileCount;
-                }                
+                }
             }
-            
+
             progressBar.progress(1);
-            
+
             // Get files by creation time.
             long currentTime = System.currentTimeMillis() / 1000;
             long minTime = currentTime - (14 * 24 * 60 * 60); // Go back two weeks.
@@ -105,16 +107,16 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
             for (FsContent otherFile : otherFiles) {
                 if (!skipKnownFiles || otherFile.getKnown() != TskData.FileKnown.KNOWN) {
                     ++fileCount;
-                }                
+                }
             }
-            
+
             // This method is thread-safe with per ingest job reference counted
             // management of shared data.
             addToFileCount(context.getJobId(), fileCount);
-            
+
             progressBar.progress(1);
-            return IngestModule.ProcessResult.OK;         
-            
+            return IngestModule.ProcessResult.OK;
+
         } catch (TskCoreException ex) {
             IngestServices ingestServices = IngestServices.getInstance();
             Logger logger = ingestServices.getLogger(AndroidIngestModuleFactory.getModuleName());
@@ -153,7 +155,9 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
                     AndroidIngestModuleFactory.getModuleName(),
                     msgText);
             IngestServices.getInstance().postMessage(message);
-        } 
+        }
     }
-    
+
+    public void sqltest() {
+    }
 }

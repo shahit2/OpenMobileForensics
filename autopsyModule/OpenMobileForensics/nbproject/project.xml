@@ -82,7 +82,28 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages/>
+            <test-dependencies>
+                <test-type>
+                    <name>unit</name>
+                    <test-dependency>
+                        <code-name-base>org.netbeans.libs.junit4</code-name-base>
+                        <compile-dependency/>
+                    </test-dependency>
+                </test-type>
+            </test-dependencies>
+            <public-packages>
+                <package>org.sleuthkit.openmobileforensics.android</package>
+                <package>org.sqlite</package>
+                <package>org.sqlite.core</package>
+                <package>org.sqlite.javax</package>
+                <package>org.sqlite.jdbc3</package>
+                <package>org.sqlite.jdbc4</package>
+                <package>org.sqlite.util</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/sqlite-jdbc4-3.8.2-SNAPSHOT.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/sqlite-jdbc4-3.8.2-SNAPSHOT.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>
