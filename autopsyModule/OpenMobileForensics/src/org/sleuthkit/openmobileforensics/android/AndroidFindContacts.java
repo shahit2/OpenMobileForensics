@@ -117,18 +117,16 @@ class AndroidFindContacts {
                     name = resultSet.getString("display_name");
                     data1 = resultSet.getString("data1");
                     mimetype = resultSet.getString("mimetype");
-                    //System.out.println(resultSet.getString("data1") + resultSet.getString("mimetype") + resultSet.getString("display_name")); //Test code
+//                    System.out.println(resultSet.getString("data1") + resultSet.getString("mimetype") + resultSet.getString("display_name")); //Test code
                     if (name.equals(oldName) == false) {
                         bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT);
                         bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", name));
                     }
-
                     if (mimetype.equals("vnd.android.cursor.item/phone_v2")) {
                         bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", data1));
                     } else {
                         bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), "Android Mobile Analysis", data1));
                     }
-
                     oldName = name;
                 }
 //Test code

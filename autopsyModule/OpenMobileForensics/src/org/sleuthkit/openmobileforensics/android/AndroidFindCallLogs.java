@@ -28,8 +28,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.datamodel.AbstractFile;
@@ -40,17 +38,17 @@ import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copyFileUsingStream;
 
-
 public class AndroidFindCallLogs {
+
     private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
     private String dbPath = "";
     private long fileId = 0;
     private java.io.File jFile = null;
-    
-    public void FindCallLogs(){
-         List<AbstractFile> absFiles;
+
+    public void FindCallLogs() {
+        List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
             absFiles = skCase.findAllFilesWhere("name ='contacts2.db' OR name ='contacts.db'"); //get exact file names
@@ -72,7 +70,8 @@ public class AndroidFindCallLogs {
             e.printStackTrace();
         }
     }
-     private void FindCallLogsInDB(String DatabasePath, long fId) {
+
+    private void FindCallLogsInDB(String DatabasePath, long fId) {
         if (DatabasePath == null || DatabasePath.isEmpty()) {
             return;
         }
@@ -89,27 +88,33 @@ public class AndroidFindCallLogs {
         try {
             AbstractFile f = skCase.getAbstractFileById(fId);
             try {
-                // get ....
                 resultSet = statement.executeQuery(
-                        "SELECT mimetype,data1, name_raw_contact.display_name AS display_name \n"
-                        + "FROM raw_contacts JOIN contacts ON (raw_contacts.contact_id=contacts._id) \n"
-                        + "JOIN raw_contacts AS name_raw_contact ON(name_raw_contact_id=name_raw_contact._id) "
-                        + "LEFT OUTER JOIN data ON (data.raw_contact_id=raw_contacts._id) \n"
-                        + "LEFT OUTER JOIN mimetypes ON (data.mimetype_id=mimetypes._id) \n"
-                        + "WHERE mimetype = 'vnd.android.cursor.item/phone_v2' OR mimetype = 'vnd.android.cursor.item/email_v2'\n"
-                        + "ORDER BY name_raw_contact.display_name ASC;");
+                        "SELECT number,date,duration,type, name FROM calls ORDER BY date DESC;");
 
                 BlackboardArtifact bba;
+                String name; // name of person dialed or called. null if unregistered
+                String number; //string phone number
+                String duration; //duration of call in seconds
+                String date; // Unix time
+                String type; // 1 incoming, 2 outgoing, 3 missed
 
                 while (resultSet.next()) {
-                    
-                    
-                        bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG); //create a call log and then add attributes from result set.
-                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", "blahblah"));
-                        
+                    name = resultSet.getString("name");
+                    number = resultSet.getString("number");
+                    duration = resultSet.getString("duration");
+                    date = resultSet.getString("date");
+                    type = resultSet.getString("type");
+
+                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG); //create a call log and then add attributes from result set.
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", number));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), "Android Mobile Analysis", date));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_VALUE.getTypeID(), "Android Mobile Analysis", duration));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DIRECTION.getTypeID(), "Android Mobile Analysis", type));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", name));
+
                 }
 //Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT)) {
+//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG)) {
 //                    System.out.println(artifact.getAttributes().toString());
 //                }
 
@@ -145,5 +150,4 @@ public class AndroidFindCallLogs {
             os.close();
         }
     }
-    
 }
