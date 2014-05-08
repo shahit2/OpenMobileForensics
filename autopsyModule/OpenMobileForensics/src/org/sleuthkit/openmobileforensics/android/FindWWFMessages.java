@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.datamodel.AbstractFile;
 import org.sleuthkit.datamodel.BlackboardArtifact;
@@ -37,9 +36,8 @@ import org.sleuthkit.datamodel.BlackboardAttribute;
 import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
-import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copyFileUsingStream;
 
- class AndroidFindTangoMessages {
+ class FindWWFMessages {
     private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
@@ -47,11 +45,11 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
     private long fileId = 0;
     private java.io.File jFile = null;
     private String moduleName= AndroidIngestModuleFactory.getModuleName();
-    public void FindTangoMessages() {
+    public void FindWWFMessages() {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere("name ='tc.db' "); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name ='chess.db' "); //get exact file names
             if (absFiles.isEmpty()) {
                 return;
             }
@@ -61,7 +59,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
                     copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
                     dbPath = jFile.toString(); //path of file as string
                     fileId = AF.getId();
-                    FindTangoMessagesInDB(dbPath, fileId);
+                    FindWWFMessagesInDB(dbPath, fileId);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,9 +67,8 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
         } catch (TskCoreException e) {
             e.printStackTrace();
         }
-        
     }
-    private void FindTangoMessagesInDB(String DatabasePath, long fId) {
+     private void FindWWFMessagesInDB(String DatabasePath, long fId) {
         if (DatabasePath == null || DatabasePath.isEmpty()) {
             return;
         }
@@ -107,7 +104,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
                     bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE); //create a call log and then add attributes from result set.
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), moduleName, create_time));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DIRECTION.getTypeID(), moduleName, direction));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT.getTypeID(), moduleName, DecodeMessage(conv_id,payload)));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(), moduleName,"Tango Message" ));
 
                 }
@@ -148,16 +144,4 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
             os.close();
         }
     }
-   private String DecodeMessage(String wrapper, String message)
-   {
-       String result= "";
-       byte[] decoded = Base64.decodeBase64(message);
-        try{
-        String Z= new String (decoded,"UTF-8");
-        result = Z.split(wrapper)[1];
-        }catch(Exception e){
-            e.printStackTrace();
-        }     
-       return result;
-   }
 }
