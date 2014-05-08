@@ -37,20 +37,22 @@ import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copyFileUsingStream;
- class AndroidFindCallLogs {
 
-    private Connection connection = null;
+
+ class AndroidFindTextMessages {
+     private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
     private String dbPath = "";
     private long fileId = 0;
     private java.io.File jFile = null;
-
-    public void FindCallLogs() {
-        List<AbstractFile> absFiles;
+    List<AbstractFile> absFiles;
+  
+    
+    void FindTexts() {
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere("name ='contacts2.db' OR name ='contacts.db'"); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name ='mmssms.db'"); //get exact file name
             if (absFiles.isEmpty()) {
                 return;
             }
@@ -60,7 +62,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
                     copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
                     dbPath = jFile.toString(); //path of file as string
                     fileId = AF.getId();
-                    FindCallLogsInDB(dbPath, fileId);
+                    FindTextsInDB(dbPath, fileId);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,8 +71,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
             e.printStackTrace();
         }
     }
-
-    private void FindCallLogsInDB(String DatabasePath, long fId) {
+     private void FindTextsInDB(String DatabasePath, long fId) {
         if (DatabasePath == null || DatabasePath.isEmpty()) {
             return;
         }
@@ -88,32 +89,32 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
             AbstractFile f = skCase.getAbstractFileById(fId);
             try {
                 resultSet = statement.executeQuery(
-                        "SELECT number,date,duration,type, name FROM calls ORDER BY date DESC;");
+                        "Select address,date,type,subject,body FROM sms;");
 
-                BlackboardArtifact bba;
-                String name; // name of person dialed or called. null if unregistered
-                String number; //string phone number
-                String duration; //duration of call in seconds
-                String date; // Unix time
-                String type; // 1 incoming, 2 outgoing, 3 missed
-
+                BlackboardArtifact bba;               
+                bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE);
+                String address; // may be phone number, or other addresses
+                String date;//unix time
+                String type; // message received in inbox = 1, message sent = 2
+                String subject;//message subject
+                String body; //message body
                 while (resultSet.next()) {
-                    name = resultSet.getString("name");
-                    number = resultSet.getString("number");
-                    duration = resultSet.getString("duration");
+                    address = resultSet.getString("address");
                     date = resultSet.getString("date");
                     type = resultSet.getString("type");
-
-                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG); //create a call log and then add attributes from result set.
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", number));
+                    subject = resultSet.getString("subject");
+                    body = resultSet.getString("body");
+                    
+                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE); //create Message artifact and then add attributes from result set.
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", address));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), "Android Mobile Analysis", date));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_VALUE.getTypeID(), "Android Mobile Analysis", duration));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DIRECTION.getTypeID(), "Android Mobile Analysis", type));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", name));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SUBJECT.getTypeID(), "Android Mobile Analysis", subject));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT.getTypeID(), "Android Mobile Analysis", body));
 
                 }
 //Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG)) {
+//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)) {
 //                    System.out.println(artifact.getAttributes().toString());
 //                }
 

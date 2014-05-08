@@ -59,6 +59,8 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
         FindContacts.FindContacts();
         AndroidFindCallLogs FindCallLogs = new AndroidFindCallLogs();
         FindCallLogs.FindCallLogs();
+        AndroidFindTextMessages FindTexts = new AndroidFindTextMessages();
+        FindTexts.FindTexts();
         progressBar.progress(1);
         return IngestModule.ProcessResult.OK;
     }
