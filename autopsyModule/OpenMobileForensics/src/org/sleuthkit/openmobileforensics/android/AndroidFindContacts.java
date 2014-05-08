@@ -45,6 +45,7 @@ class AndroidFindContacts {
     private String dbPath = "";
     private long fileId = 0;
     private java.io.File jFile = null;
+    private String moduleName= AndroidIngestModuleFactory.getModuleName();
     //store possible contact database names
     //  private static final String[] possibleContactDatabaseNames = new String[]{"contacts2", "contacts.db"}; //might use this for whitelisting db names after query
 
@@ -120,12 +121,12 @@ class AndroidFindContacts {
 //                    System.out.println(resultSet.getString("data1") + resultSet.getString("mimetype") + resultSet.getString("display_name")); //Test code
                     if (name.equals(oldName) == false) {
                         bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT);
-                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", name));
+                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), moduleName, name));
                     }
                     if (mimetype.equals("vnd.android.cursor.item/phone_v2")) {
-                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", data1));
+                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), moduleName, data1));
                     } else {
-                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), "Android Mobile Analysis", data1));
+                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), moduleName, data1));
                     }
                     oldName = name;
                 }
