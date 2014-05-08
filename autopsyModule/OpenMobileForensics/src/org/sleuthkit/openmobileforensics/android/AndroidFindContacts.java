@@ -28,8 +28,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import org.sleuthkit.autopsy.casemodule.Case;
 import org.sleuthkit.datamodel.AbstractFile;
@@ -109,10 +107,8 @@ class AndroidFindContacts {
                         + "WHERE mimetype = 'vnd.android.cursor.item/phone_v2' OR mimetype = 'vnd.android.cursor.item/email_v2'\n"
                         + "ORDER BY name_raw_contact.display_name ASC;");
 
-                BlackboardArtifact bba;
-                Collection<BlackboardAttribute> attributes = new ArrayList<>();
+                BlackboardArtifact bba;               
                 bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT);
-
                 String name;
                 String oldName = "";
                 String mimetype;
@@ -122,20 +118,15 @@ class AndroidFindContacts {
                     data1 = resultSet.getString("data1");
                     mimetype = resultSet.getString("mimetype");
                     //System.out.println(resultSet.getString("data1") + resultSet.getString("mimetype") + resultSet.getString("display_name")); //Test code
-                    if (name.equals(oldName)) {
-                        if (mimetype.equals("vnd.android.cursor.item/phone_v2")) {
-                            bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", data1));
-                        } else {
-                            bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), "Android Mobile Analysis", data1));
-                        }
-                    } else {
+                    if (name.equals(oldName) == false) {
                         bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT);
                         bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), "Android Mobile Analysis", name));
-                        if (mimetype.equals("vnd.android.cursor.item/phone_v2")) {
-                            bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", data1));
-                        } else {
-                            bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), "Android Mobile Analysis", data1));
-                        }
+                    }
+
+                    if (mimetype.equals("vnd.android.cursor.item/phone_v2")) {
+                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(), "Android Mobile Analysis", data1));
+                    } else {
+                        bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_EMAIL.getTypeID(), "Android Mobile Analysis", data1));
                     }
 
                     oldName = name;

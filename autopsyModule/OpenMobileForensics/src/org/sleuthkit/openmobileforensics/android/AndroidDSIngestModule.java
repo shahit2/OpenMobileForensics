@@ -24,9 +24,7 @@ import org.sleuthkit.autopsy.ingest.IngestModule;
 import org.sleuthkit.datamodel.Content;
 import org.sleuthkit.autopsy.ingest.DataSourceIngestModule;
 import org.sleuthkit.autopsy.ingest.IngestJobContext;
-import org.sleuthkit.autopsy.ingest.IngestMessage;
 import org.sleuthkit.autopsy.ingest.IngestModuleAdapter;
-import org.sleuthkit.autopsy.ingest.IngestServices;
 import org.sleuthkit.autopsy.ingest.IngestModuleReferenceCounter;
 
 /**
