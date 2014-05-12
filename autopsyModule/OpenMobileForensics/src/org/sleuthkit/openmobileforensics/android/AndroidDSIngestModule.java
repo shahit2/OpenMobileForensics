@@ -63,6 +63,8 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
         FindTexts.FindTexts();
         AndroidFindTangoMessages FindTangoMessages = new AndroidFindTangoMessages();
         FindTangoMessages.FindTangoMessages();
+        AndroidFindGoogleMapLocations FindGeoLocations = new AndroidFindGoogleMapLocations();
+        FindGeoLocations.FindGeoLocations();
         
         progressBar.progress(1);
         return IngestModule.ProcessResult.OK;

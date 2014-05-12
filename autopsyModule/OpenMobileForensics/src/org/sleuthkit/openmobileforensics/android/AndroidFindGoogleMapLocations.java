@@ -38,7 +38,7 @@ import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copyFileUsingStream;
 
-class AndroidFindGeoLocations {
+class AndroidFindGoogleMapLocations {
     
     private Connection connection = null;
     private ResultSet resultSet = null;
@@ -52,7 +52,7 @@ class AndroidFindGeoLocations {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere(""); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name ='da_destination_history'"); //get exact file names
             if (absFiles.isEmpty()) {
                 return;
             }
@@ -90,31 +90,43 @@ class AndroidFindGeoLocations {
             AbstractFile f = skCase.getAbstractFileById(fId);
             try {
                 resultSet = statement.executeQuery(
-                        "SELECT number,date,duration,type, name FROM calls ORDER BY date DESC;");
+                        "Select time,dest_lat,dest_lng,dest_title,dest_address,source_lat,source_lng FROM destination_history;");
 
                 BlackboardArtifact bba;
-                String name; // name of person dialed or called. null if unregistered
-                String number; //string phone number
-                String duration; //duration of call in seconds
-                String date; // Unix time
-                String type; // 1 incoming, 2 outgoing, 3 missed
+                String time; // unix time
+                String dest_lat; 
+                String dest_lng; 
+                String dest_title; 
+                String dest_address;
+                String source_lat;
+                String source_lng;
 
                 while (resultSet.next()) {
-                    name = resultSet.getString("name");
-                    number = resultSet.getString("number");
-                    duration = resultSet.getString("duration");
-                    date = resultSet.getString("date");
-                    type = resultSet.getString("type");
+                    time = resultSet.getString("time");
+                    dest_lat = resultSet.getString("dest_lat");
+                    dest_lng = resultSet.getString("dest_lng");
+                    dest_title = resultSet.getString("dest_title");
+                    dest_address = resultSet.getString("dest_address");
+                    source_lat = resultSet.getString("source_lat");
+                    source_lng = resultSet.getString("source_lng");
 
-                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG); //create a call log and then add attributes from result set.
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER.getTypeID(),moduleName, number));
-                   
+                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//src
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(),moduleName, "Source"));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName,source_lat));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName, source_lng));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, time));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, "Google Maps History"));
+                    
+                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//dest 
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(),moduleName, "Destination"));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, time));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName, dest_lat));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName,dest_lng));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(),moduleName, dest_title));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_LOCATION.getTypeID(),moduleName, dest_address));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, "Google Maps History"));
 
                 }
-//Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG)) {
-//                    System.out.println(artifact.getAttributes().toString());
-//                }
 
             } catch (Exception e) {
                 e.printStackTrace();
