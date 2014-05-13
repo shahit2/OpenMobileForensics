@@ -36,9 +36,8 @@ import org.sleuthkit.datamodel.BlackboardAttribute;
 import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
-import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copyFileUsingStream;
 
-class AndroidFindGoogleMapLocations {
+class AndroidFindBrowserLocations {
     
     private Connection connection = null;
     private ResultSet resultSet = null;
@@ -52,12 +51,13 @@ class AndroidFindGoogleMapLocations {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere("name ='da_destination_history'"); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name LIKE 'CachedGeoposition%.db'"); //get exact file names
             if (absFiles.isEmpty()) {
                 return;
             }
             for (AbstractFile AF : absFiles) {
                 try {
+                    if (AF.getSize() ==0) continue;
                     jFile = new java.io.File(Case.getCurrentCase().getTempDirectory(), AF.getName());
                     copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
                     dbPath = jFile.toString(); //path of file as string
@@ -90,45 +90,28 @@ class AndroidFindGoogleMapLocations {
             AbstractFile f = skCase.getAbstractFileById(fId);
             try {
                 resultSet = statement.executeQuery(
-                        "Select time,dest_lat,dest_lng,dest_title,dest_address,source_lat,source_lng FROM destination_history;");
+                        "Select timestamp, latitude, longitude, accuracy FROM CachedPosition;");
 
                 BlackboardArtifact bba;
-                String time; // unix time
-                String dest_lat; 
-                String dest_lng; 
-                String dest_title; 
-                String dest_address;
-                String source_lat;
-                String source_lng;
+                String timestamp; // unix time
+                String latitude; 
+                String longitude; 
+                String accuracy; //measure of how accurate the gps location is.
+
 
                 while (resultSet.next()) {
-                    time = resultSet.getString("time");
-                    dest_lat = resultSet.getString("dest_lat");
-                    dest_lng = resultSet.getString("dest_lng");
-                    dest_title = resultSet.getString("dest_title");
-                    dest_address = resultSet.getString("dest_address");
-                    source_lat = resultSet.getString("source_lat");
-                    source_lng = resultSet.getString("source_lng");
-dest_lat= (dest_lat.charAt(0) =='-')?   dest_lat.substring(0, 3) + "." + dest_lat.substring(3, dest_lat.length()): dest_lat.substring(0, 2) + "." + dest_lat.substring(2, dest_lat.length());
-dest_lng= (dest_lng.charAt(0) =='-')?   dest_lng.substring(0, 3) + "." + dest_lng.substring(3, dest_lng.length()): dest_lng.substring(0, 2) + "." + dest_lng.substring(2, dest_lng.length());
-source_lat= (source_lat.charAt(0) =='-')?   source_lat.substring(0, 3) + "." + source_lat.substring(3, source_lat.length()): source_lat.substring(0, 2) + "." + source_lat.substring(2, source_lat.length());
-source_lng= (source_lng.charAt(0) =='-')?   source_lng.substring(0, 3) + "." + source_lng.substring(3, source_lng.length()): source_lng.substring(0, 2) + "." + source_lng.substring(2, source_lng.length());
+                    timestamp = resultSet.getString("timestamp");
+                    latitude= resultSet.getString("latitude");
+                    longitude = resultSet.getString("longitude");
+                    accuracy = resultSet.getString("accuracy");
+
+                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName,latitude));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName, longitude));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, timestamp));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, "Browser Location History"));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_VALUE.getTypeID(),moduleName, accuracy)); 
                     
-                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//src
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(),moduleName, "Source"));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName,source_lat));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName, source_lng));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, time));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, "Google Maps History"));
-                    
-                    bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//dest 
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(),moduleName, "Destination"));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, time));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName, dest_lat));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName,dest_lng));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(),moduleName, dest_title));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_LOCATION.getTypeID(),moduleName, dest_address));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, "Google Maps History"));
 
                 }
 
