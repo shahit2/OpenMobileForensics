@@ -130,10 +130,6 @@ class AndroidFindContacts {
                     }
                     oldName = name;
                 }
-//Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT)) {
-//                    System.out.println(artifact.getAttributes().toString());
-//                }
 
             } catch (Exception e) {
                 e.printStackTrace();

@@ -114,10 +114,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_MESSAGE_TYPE.getTypeID(), moduleName,"SMS Message" ));
 
                 }
-//Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)) {
-//                    System.out.println(artifact.getAttributes().toString());
-//                }
 
             } catch (Exception e) {
                 e.printStackTrace();

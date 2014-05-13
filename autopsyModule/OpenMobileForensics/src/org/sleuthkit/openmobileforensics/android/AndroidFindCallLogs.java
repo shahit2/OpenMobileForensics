@@ -112,11 +112,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), moduleName, name));
 
                 }
-//Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG)) {
-//                    System.out.println(artifact.getAttributes().toString());
-//                }
-
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

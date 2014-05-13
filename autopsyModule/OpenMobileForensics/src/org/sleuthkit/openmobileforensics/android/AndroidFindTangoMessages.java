@@ -111,10 +111,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_MESSAGE_TYPE.getTypeID(), moduleName,"Tango Message" ));
 
                 }
-//Test code
-//                for (BlackboardArtifact artifact : skCase.getBlackboardArtifacts(BlackboardArtifact.ARTIFACT_TYPE.TSK_CALLLOG)) {
-//                    System.out.println(artifact.getAttributes().toString());
-//                }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -130,7 +126,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private static void copyFileUsingStream(AbstractFile file, File jFile) throws IOException {
