@@ -109,11 +109,17 @@ class AndroidFindGoogleMapLocations {
                     dest_address = resultSet.getString("dest_address");
                     source_lat = resultSet.getString("source_lat");
                     source_lng = resultSet.getString("source_lng");
-                    dest_lat = (dest_lat.charAt(0) == '-') ? dest_lat.substring(0, 3) + "." + dest_lat.substring(3, dest_lat.length()) : dest_lat.substring(0, 2) + "." + dest_lat.substring(2, dest_lat.length());
-                    dest_lng = (dest_lng.charAt(0) == '-') ? dest_lng.substring(0, 3) + "." + dest_lng.substring(3, dest_lng.length()) : dest_lng.substring(0, 2) + "." + dest_lng.substring(2, dest_lng.length());
-                    source_lat = (source_lat.charAt(0) == '-') ? source_lat.substring(0, 3) + "." + source_lat.substring(3, source_lat.length()) : source_lat.substring(0, 2) + "." + source_lat.substring(2, source_lat.length());
-                    source_lng = (source_lng.charAt(0) == '-') ? source_lng.substring(0, 3) + "." + source_lng.substring(3, source_lng.length()) : source_lng.substring(0, 2) + "." + source_lng.substring(2, source_lng.length());
-
+                    
+                    //This code for adding periods might be incorrect if google maps doesnt always provide 8 decimals by adding 0s to the front for numbers <10 and fractions <1
+                    //modify if data suggests such.
+//                    dest_lat = (dest_lat.charAt(0) == '-') ? dest_lat.substring(0, 3) + "." + dest_lat.substring(3, dest_lat.length()) : dest_lat.substring(0, 2) + "." + dest_lat.substring(2, dest_lat.length());
+//                    dest_lng = (dest_lng.charAt(0) == '-') ? dest_lng.substring(0, 3) + "." + dest_lng.substring(3, dest_lng.length()) : dest_lng.substring(0, 2) + "." + dest_lng.substring(2, dest_lng.length());
+//                    source_lat = (source_lat.charAt(0) == '-') ? source_lat.substring(0, 3) + "." + source_lat.substring(3, source_lat.length()) : source_lat.substring(0, 2) + "." + source_lat.substring(2, source_lat.length());
+//                    source_lng = (source_lng.charAt(0) == '-') ? source_lng.substring(0, 3) + "." + source_lng.substring(3, source_lng.length()) : source_lng.substring(0, 2) + "." + source_lng.substring(2, source_lng.length());
+                    dest_lat =  dest_lat.substring(0, dest_lat.length()-6) + "." + dest_lat.substring(dest_lat.length()-6, dest_lat.length()) ;
+                    dest_lng =  dest_lng.substring(0, dest_lng.length()-6) + "." + dest_lng.substring(dest_lng.length()-6, dest_lng.length())  ;
+                    source_lat = source_lat.substring(0, source_lat.length()-6) + "." + source_lat.substring(source_lat.length()-6, source_lat.length()) ;
+                    source_lng = source_lng.substring(0, source_lng.length()-6) + "." + source_lng.substring(source_lng.length()-6, source_lng.length()) ;
                     bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//src
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(), moduleName, "Source"));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(), moduleName, source_lat));
