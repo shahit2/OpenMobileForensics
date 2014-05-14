@@ -37,7 +37,7 @@ import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 
- class FindWWFMessages {
+ class AndroidFindWWFMessages {
     private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
@@ -49,7 +49,7 @@ import org.sleuthkit.datamodel.TskCoreException;
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere("name ='chess.db' "); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name ='WordsFramework' "); //get exact file names
             if (absFiles.isEmpty()) {
                 return;
             }
@@ -86,24 +86,26 @@ import org.sleuthkit.datamodel.TskCoreException;
             AbstractFile f = skCase.getAbstractFileById(fId);
             try {
                 resultSet = statement.executeQuery(
-                        "Select conv_id, create_time,direction,payload FROM messages ORDER BY create_time DESC;");
+                        "SELECT message,created_at,user_id,game_id FROM chat_messages ORDER BY game_id DESC, created_at DESC;");
 
                 BlackboardArtifact bba;
-                String conv_id; // seems to wrap around the message found in payload after decoding from base-64
-                String create_time; // unix time
-                String direction; // 1 incoming, 2 outgoing
-                String payload; // seems to be a base64 message wrapped by the conv_id
+                String message; // WWF Message
+                String created_at; // unix time
+                String user_id; // the ID of the user who sent the message.
+                String game_id; // ID of the game which the the message was sent.
               
 
                 while (resultSet.next()) {
-                    conv_id = resultSet.getString("conv_id");
-                    create_time = resultSet.getString("create_time");
-                    direction = resultSet.getString("direction");
-                    payload = resultSet.getString("payload");
+                    message = resultSet.getString("message");
+                    created_at = resultSet.getString("created_at");
+                    user_id = resultSet.getString("user_id");
+                    game_id = resultSet.getString("game_id");
 
                     bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE); //create a call log and then add attributes from result set.
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), moduleName, create_time));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DIRECTION.getTypeID(), moduleName, direction));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), moduleName, created_at));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), moduleName, user_id));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_MSG_ID.getTypeID(), moduleName, game_id));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT.getTypeID(), moduleName,message));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(), moduleName,"Words With Friends Message" ));
 
                 }

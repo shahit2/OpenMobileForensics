@@ -92,7 +92,6 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
                         "Select address,date,type,subject,body FROM sms;");
 
                 BlackboardArtifact bba;               
-                bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE);
                 String address; // may be phone number, or other addresses
                 String date;//unix time
                 String type; // message received in inbox = 1, message sent = 2

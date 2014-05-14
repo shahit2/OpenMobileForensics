@@ -46,8 +46,6 @@ class AndroidFindContacts {
     private long fileId = 0;
     private java.io.File jFile = null;
     private String moduleName= AndroidIngestModuleFactory.getModuleName();
-    //store possible contact database names
-    //  private static final String[] possibleContactDatabaseNames = new String[]{"contacts2", "contacts.db"}; //might use this for whitelisting db names after query
 
     public void FindContacts() {
 
@@ -112,8 +110,8 @@ class AndroidFindContacts {
                 bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT);
                 String name;
                 String oldName = "";
-                String mimetype;
-                String data1;
+                String mimetype; // either phone or email
+                String data1; // the phone number or email
                 while (resultSet.next()) {
                     name = resultSet.getString("display_name");
                     data1 = resultSet.getString("data1");

@@ -97,7 +97,7 @@ class AndroidFindCacheLocations {
                 inputStream.read(bytes);
                 bytes = new byte[(int) 1];
                 inputStream.read(bytes);
-                while (new BigInteger(bytes).intValue() != 0) //pass through non important values until the start of accuracy
+                while (new BigInteger(bytes).intValue() != 0) //pass through non important values until the start of accuracy(around 7-10 bytes)
                 {
                     inputStream.read(bytes);
                 }
@@ -124,15 +124,17 @@ class AndroidFindCacheLocations {
                 
                 bytes = new byte[(int) 8];
                 inputStream.read(bytes);
-                timestamp = ""+new BigInteger(bytes).floatValue();
+                timestamp = ""+new BigInteger(bytes).intValue();
                 
                 bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);
                 bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE.getTypeID(),moduleName,latitude));
                 bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(),moduleName, longitude));
                 bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(),moduleName, timestamp));
-                bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(),moduleName, fileName+" Location History"));
-                bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_VALUE.getTypeID(),moduleName, accuracy));       
-                bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_COMMENT.getTypeID(),moduleName, confidence));
+                bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PROG_NAME.getTypeID(),moduleName, fileName+" Location History"));
+                
+             //Not storing these for now.
+            //    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_VALUE.getTypeID(),moduleName, accuracy));       
+            //    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_COMMENT.getTypeID(),moduleName, confidence));
             }
                 
         }catch (Exception e) {

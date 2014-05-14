@@ -55,20 +55,22 @@ class AndroidDSIngestModule extends IngestModuleAdapter implements DataSourceIng
         // There are two tasks to do. Set the the progress bar to determinate 
         // and set the remaining number of work units to be completed to two.
         progressBar.switchToDeterminate(2);
-        AndroidFindContacts FindContacts = new AndroidFindContacts();
-        FindContacts.FindContacts();
-        AndroidFindCallLogs FindCallLogs = new AndroidFindCallLogs();
-        FindCallLogs.FindCallLogs();
-        AndroidFindTextMessages FindTexts = new AndroidFindTextMessages();
-        FindTexts.FindTexts();
-        AndroidFindTangoMessages FindTangoMessages = new AndroidFindTangoMessages();
-        FindTangoMessages.FindTangoMessages();
-        AndroidFindGoogleMapLocations FindGoogleMapLocations = new AndroidFindGoogleMapLocations();
-        FindGoogleMapLocations.FindGeoLocations();
-        AndroidFindBrowserLocations FindBrowserLocations = new AndroidFindBrowserLocations();
-        FindBrowserLocations.FindGeoLocations();
-        AndroidFindCacheLocations FindCacheLocations = new AndroidFindCacheLocations();
-        FindCacheLocations.FindGeoLocations();
+//        AndroidFindContacts FindContacts = new AndroidFindContacts();
+//        FindContacts.FindContacts();
+//        AndroidFindCallLogs FindCallLogs = new AndroidFindCallLogs();
+//        FindCallLogs.FindCallLogs();
+//        AndroidFindTextMessages FindTexts = new AndroidFindTextMessages();
+//        FindTexts.FindTexts();
+//        AndroidFindTangoMessages FindTangoMessages = new AndroidFindTangoMessages();
+//        FindTangoMessages.FindTangoMessages();
+        AndroidFindWWFMessages FindWWFMessages = new AndroidFindWWFMessages();
+        FindWWFMessages.FindWWFMessages();
+//        AndroidFindGoogleMapLocations FindGoogleMapLocations = new AndroidFindGoogleMapLocations();
+//        FindGoogleMapLocations.FindGeoLocations();
+//        AndroidFindBrowserLocations FindBrowserLocations = new AndroidFindBrowserLocations();
+//        FindBrowserLocations.FindGeoLocations();
+//        AndroidFindCacheLocations FindCacheLocations = new AndroidFindCacheLocations();
+//        FindCacheLocations.FindGeoLocations();
         
         progressBar.progress(1);
         return IngestModule.ProcessResult.OK;

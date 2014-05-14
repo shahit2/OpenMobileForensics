@@ -52,7 +52,7 @@ class AndroidFindGoogleMapLocations {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
-            absFiles = skCase.findAllFilesWhere("name ='da_destination_history'"); //get exact file names
+            absFiles = skCase.findAllFilesWhere("name ='da_destination_history'"); //get exact file name
             if (absFiles.isEmpty()) {
                 return;
             }
@@ -96,7 +96,7 @@ class AndroidFindGoogleMapLocations {
                 String time; // unix time
                 String dest_lat;
                 String dest_lng;
-                String dest_title;
+                String dest_title; // name of the location
                 String dest_address;
                 String source_lat;
                 String source_lng;
@@ -111,10 +111,10 @@ class AndroidFindGoogleMapLocations {
                     source_lng = resultSet.getString("source_lng");
                     
                     //add periods 6 decimal places before the end.
-                    dest_lat =  dest_lat.substring(0, dest_lat.length()-6) + "." + dest_lat.substring(dest_lat.length()-6, dest_lat.length()) ;
-                    dest_lng =  dest_lng.substring(0, dest_lng.length()-6) + "." + dest_lng.substring(dest_lng.length()-6, dest_lng.length())  ;
-                    source_lat = source_lat.substring(0, source_lat.length()-6) + "." + source_lat.substring(source_lat.length()-6, source_lat.length()) ;
-                    source_lng = source_lng.substring(0, source_lng.length()-6) + "." + source_lng.substring(source_lng.length()-6, source_lng.length()) ;
+                    if(dest_lat.length()>6)dest_lat =  dest_lat.substring(0, dest_lat.length()-6) + "." + dest_lat.substring(dest_lat.length()-6, dest_lat.length()) ;
+                    if(dest_lng.length()>6)dest_lng =  dest_lng.substring(0, dest_lng.length()-6) + "." + dest_lng.substring(dest_lng.length()-6, dest_lng.length())  ;
+                    if(source_lat.length()>6)source_lat = source_lat.substring(0, source_lat.length()-6) + "." + source_lat.substring(source_lat.length()-6, source_lat.length()) ;
+                    if(source_lng.length()>6)source_lng = source_lng.substring(0, source_lng.length()-6) + "." + source_lng.substring(source_lng.length()-6, source_lng.length()) ;
                     
                     bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);//src
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_CATEGORY.getTypeID(), moduleName, "Source"));
@@ -130,7 +130,7 @@ class AndroidFindGoogleMapLocations {
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE.getTypeID(), moduleName, dest_lng));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME.getTypeID(), moduleName, dest_title));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_LOCATION.getTypeID(), moduleName, dest_address));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DESCRIPTION.getTypeID(), moduleName, "Google Maps History"));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PROG_NAME.getTypeID(), moduleName, "Google Maps History"));
 
                 }
 

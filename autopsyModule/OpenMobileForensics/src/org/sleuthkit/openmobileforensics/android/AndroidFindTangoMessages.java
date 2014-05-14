@@ -143,6 +143,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
             os.close();
         }
     }
+   //take the message string which is wrapped by a certain string, and return the text enclosed.
    private String DecodeMessage(String wrapper, String message)
    {
        String result= "";
