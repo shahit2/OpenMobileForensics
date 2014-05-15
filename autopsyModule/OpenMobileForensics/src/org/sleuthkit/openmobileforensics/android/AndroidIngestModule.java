@@ -27,11 +27,10 @@ import org.sleuthkit.datamodel.Content;
 import org.sleuthkit.autopsy.ingest.DataSourceIngestModule;
 import org.sleuthkit.autopsy.ingest.IngestJobContext;
 import org.sleuthkit.autopsy.ingest.IngestMessage;
-import org.sleuthkit.autopsy.ingest.IngestModuleAdapter;
 import org.sleuthkit.autopsy.ingest.IngestModuleReferenceCounter;
 import org.sleuthkit.autopsy.ingest.IngestServices;
 
-class AndroidIngestModule extends IngestModuleAdapter implements DataSourceIngestModule {
+class AndroidIngestModule implements DataSourceIngestModule {
 
     private static final HashMap<Long, Long> fileCountsForIngestJobs = new HashMap<>();
     private IngestJobContext context = null;
@@ -159,7 +158,5 @@ class AndroidIngestModule extends IngestModuleAdapter implements DataSourceInges
         return IngestModule.ProcessResult.OK;
     }
 
-    @Override
-    public void shutDown(boolean ingestJobCancelled) {
-    }
+
 }
