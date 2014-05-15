@@ -18,28 +18,24 @@
  */
 package org.sleuthkit.openmobileforensics.android;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.logging.Level;
 import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.autopsy.coreutils.Logger;
+import org.sleuthkit.autopsy.datamodel.ContentUtils;
 import org.sleuthkit.datamodel.AbstractFile;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.BlackboardAttribute;
-import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
-import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copyFileUsingStream;
 
 
- class AndroidFindTextMessages {
+ class TextMessageAnalyzer {
      private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
@@ -47,9 +43,11 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
     private long fileId = 0;
     private java.io.File jFile = null;
     List<AbstractFile> absFiles;
-    private String moduleName= AndroidIngestModuleFactory.getModuleName();
+    private String moduleName= AndroidModuleFactory.getModuleName();
+    private static final Logger logger = Logger.getLogger(TextMessageAnalyzer.class.getName());
     
-    void FindTexts() {
+    
+    void findTexts() {
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
             absFiles = skCase.findAllFilesWhere("name ='mmssms.db'"); //get exact file name
@@ -59,19 +57,19 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
             for (AbstractFile AF : absFiles) {
                 try {
                     jFile = new java.io.File(Case.getCurrentCase().getTempDirectory(), AF.getName());
-                    copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
+                    ContentUtils.writeToFile(AF,jFile);
                     dbPath = jFile.toString(); //path of file as string
                     fileId = AF.getId();
-                    FindTextsInDB(dbPath, fileId);
+                    findTextsInDB(dbPath, fileId);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.SEVERE, "Error parsing text messages", e);
                 }
             }
         } catch (TskCoreException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error finding text messages", e);
         }
     }
-     private void FindTextsInDB(String DatabasePath, long fId) {
+     private void findTextsInDB(String DatabasePath, long fId) {
         if (DatabasePath == null || DatabasePath.isEmpty()) {
             return;
         }
@@ -80,7 +78,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
             connection = DriverManager.getConnection("jdbc:sqlite:" + DatabasePath);
             statement = connection.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error opening database", e);
         }
 
         Case currentCase = Case.getCurrentCase();
@@ -115,35 +113,21 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindContacts.copy
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+               logger.log(Level.SEVERE, "Error parsing text messages to Blackboard", e);
             } finally {
                 try {
                     resultSet.close();
                     statement.close();
                     connection.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                   logger.log(Level.SEVERE, "Error closing database", e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error parsing text messages to Blackboard", e);
         }
 
     }
 
-    public static void copyFileUsingStream(AbstractFile file, File jFile) throws IOException {
-        InputStream is = new ReadContentInputStream(file);
-        OutputStream os = new FileOutputStream(jFile);
-        byte[] buffer = new byte[8192];
-        int length;
-        try {
-            while ((length = is.read(buffer)) != -1) {
-                os.write(buffer, 0, length);
-            }
-
-        } finally {
-            is.close();
-            os.close();
-        }
-    }
+    
 }

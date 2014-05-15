@@ -20,29 +20,28 @@ package org.sleuthkit.openmobileforensics.android;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.logging.Level;
 import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.autopsy.coreutils.Logger;
+import org.sleuthkit.autopsy.datamodel.ContentUtils;
 import org.sleuthkit.datamodel.AbstractFile;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.BlackboardAttribute;
-import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
 
-class AndroidFindCacheLocations {
+class CacheLocationAnalyzer {
 
     private String filePath = "";
     private long fileId = 0;
     private java.io.File jFile = null;
-    private String moduleName= AndroidIngestModuleFactory.getModuleName();
-    
-    public void FindGeoLocations() {
+    private String moduleName= AndroidModuleFactory.getModuleName();
+    private static final Logger logger = Logger.getLogger(CacheLocationAnalyzer.class.getName());
+    public void findGeoLocations() {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
@@ -54,20 +53,20 @@ class AndroidFindCacheLocations {
                 try {
                     if (AF.getSize() ==0) continue;
                     jFile = new java.io.File(Case.getCurrentCase().getTempDirectory(), AF.getName());
-                    copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
+                    ContentUtils.writeToFile(AF,jFile);
                     filePath = jFile.toString(); //path of file as string
                     fileId = AF.getId();
-                    FindGeoLocationsInFile(filePath, fileId);
+                    findGeoLocationsInFile(filePath, fileId);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                   logger.log(Level.SEVERE, "Error parsing cached Location files", e);
                 }
             }
         } catch (TskCoreException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error finding cached Location files", e);
         }
     }
 
-    private void FindGeoLocationsInFile(String filePath, long fId) {
+    private void findGeoLocationsInFile(String filePath, long fId) {
         if (filePath == null || filePath.isEmpty()) {
             return;
         }
@@ -138,25 +137,10 @@ class AndroidFindCacheLocations {
             }
                 
         }catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error parsing Cached GPS locations to Blackboard", e);
         }
     }
 
-    public static void copyFileUsingStream(AbstractFile file, File jFile) throws IOException {
-        InputStream is = new ReadContentInputStream(file);
-        OutputStream os = new FileOutputStream(jFile);
-        byte[] buffer = new byte[8192];
-        int length;
-        try {
-            while ((length = is.read(buffer)) != -1) {
-                os.write(buffer, 0, length);
-            }
-
-        } finally {
-            is.close();
-            os.close();
-        }
-    }
     public static double toDouble(byte[] bytes) {
     return ByteBuffer.wrap(bytes).getDouble();
     }   

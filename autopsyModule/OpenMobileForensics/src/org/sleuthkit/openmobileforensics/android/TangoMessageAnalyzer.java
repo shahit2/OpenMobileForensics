@@ -18,36 +18,34 @@
  */
 package org.sleuthkit.openmobileforensics.android;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.commons.codec.binary.Base64;
 import org.sleuthkit.autopsy.casemodule.Case;
+import org.sleuthkit.autopsy.coreutils.Logger;
+import org.sleuthkit.autopsy.datamodel.ContentUtils;
 import org.sleuthkit.datamodel.AbstractFile;
 import org.sleuthkit.datamodel.BlackboardArtifact;
 import org.sleuthkit.datamodel.BlackboardAttribute;
-import org.sleuthkit.datamodel.ReadContentInputStream;
 import org.sleuthkit.datamodel.SleuthkitCase;
 import org.sleuthkit.datamodel.TskCoreException;
-import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copyFileUsingStream;
 
- class AndroidFindTangoMessages {
+ class TangoMessageAnalyzer {
     private Connection connection = null;
     private ResultSet resultSet = null;
     private Statement statement = null;
     private String dbPath = "";
     private long fileId = 0;
     private java.io.File jFile = null;
-    private String moduleName= AndroidIngestModuleFactory.getModuleName();
-    public void FindTangoMessages() {
+    private String moduleName= AndroidModuleFactory.getModuleName();
+    private static final Logger logger = Logger.getLogger(TangoMessageAnalyzer.class.getName());
+    
+    public void findTangoMessages() {
         List<AbstractFile> absFiles;
         try {
             SleuthkitCase skCase = Case.getCurrentCase().getSleuthkitCase();
@@ -58,20 +56,20 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
             for (AbstractFile AF : absFiles) {
                 try {
                     jFile = new java.io.File(Case.getCurrentCase().getTempDirectory(), AF.getName());
-                    copyFileUsingStream(AF, jFile); //extract the abstract file to the case's TEMP dir
+                    ContentUtils.writeToFile(AF,jFile);
                     dbPath = jFile.toString(); //path of file as string
                     fileId = AF.getId();
-                    FindTangoMessagesInDB(dbPath, fileId);
+                    findTangoMessagesInDB(dbPath, fileId);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.SEVERE, "Error parsing Tango messages", e);
                 }
             }
         } catch (TskCoreException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error finding Tango messages", e);
         }
         
     }
-    private void FindTangoMessagesInDB(String DatabasePath, long fId) {
+    private void findTangoMessagesInDB(String DatabasePath, long fId) {
         if (DatabasePath == null || DatabasePath.isEmpty()) {
             return;
         }
@@ -80,7 +78,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
             connection = DriverManager.getConnection("jdbc:sqlite:" + DatabasePath);
             statement = connection.createStatement();
         } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error opening database", e);
         }
 
         Case currentCase = Case.getCurrentCase();
@@ -107,44 +105,29 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
                     bba = f.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE); //create a call log and then add attributes from result set.
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME.getTypeID(), moduleName, create_time));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DIRECTION.getTypeID(), moduleName, direction));
-                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT.getTypeID(), moduleName, DecodeMessage(conv_id,payload)));
+                    bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT.getTypeID(), moduleName, decodeMessage(conv_id,payload)));
                     bba.addAttribute(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_MESSAGE_TYPE.getTypeID(), moduleName,"Tango Message" ));
 
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+               logger.log(Level.SEVERE, "Error parsing Tango messages to the Blackboard", e);
             } finally {
                 try {
                     resultSet.close();
                     statement.close();
                     connection.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.SEVERE, "Error closing database", e);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error parsing Tango messages to the Blackboard", e);
         }
     }
 
-    private static void copyFileUsingStream(AbstractFile file, File jFile) throws IOException {
-        InputStream is = new ReadContentInputStream(file);
-        OutputStream os = new FileOutputStream(jFile);
-        byte[] buffer = new byte[8192];
-        int length;
-        try {
-            while ((length = is.read(buffer)) != -1) {
-                os.write(buffer, 0, length);
-            }
-
-        } finally {
-            is.close();
-            os.close();
-        }
-    }
    //take the message string which is wrapped by a certain string, and return the text enclosed.
-   private String DecodeMessage(String wrapper, String message)
+   private String decodeMessage(String wrapper, String message)
    {
        String result= "";
        byte[] decoded = Base64.decodeBase64(message);
@@ -152,7 +135,7 @@ import static org.sleuthkit.openmobileforensics.android.AndroidFindCallLogs.copy
         String Z= new String (decoded,"UTF-8");
         result = Z.split(wrapper)[1];
         }catch(Exception e){
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error decoding a Tango message", e);
         }     
        return result;
    }
