@@ -18,8 +18,8 @@
  */
 package org.sleuthkit.openmobileforensics.android;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import org.openide.util.NbBundle;
 import org.sleuthkit.autopsy.coreutils.Logger;
 import org.sleuthkit.autopsy.ingest.DataSourceIngestModuleProgress;
 import org.sleuthkit.autopsy.ingest.IngestModule;
@@ -30,7 +30,6 @@ import org.sleuthkit.autopsy.ingest.IngestMessage;
 import org.sleuthkit.autopsy.ingest.IngestModuleAdapter;
 import org.sleuthkit.autopsy.ingest.IngestModuleReferenceCounter;
 import org.sleuthkit.autopsy.ingest.IngestServices;
-
 
 class AndroidIngestModule extends IngestModuleAdapter implements DataSourceIngestModule {
 
@@ -43,68 +42,124 @@ class AndroidIngestModule extends IngestModuleAdapter implements DataSourceInges
     @Override
     public void startUp(IngestJobContext context) throws IngestModuleException {
         this.context = context;
-
     }
 
     @Override
     public ProcessResult process(Content dataSource, DataSourceIngestModuleProgress progressBar) {
-        // There are two tasks to do. Set the the progress bar to determinate 
-        // and set the remaining number of work units to be completed to two.
+
+
+        services.postMessage(IngestMessage.createMessage(IngestMessage.MessageType.INFO, AndroidModuleFactory.getModuleName(), "Started {0}"));
+
+
+        ArrayList<String> errors = new ArrayList<>();
         progressBar.switchToDeterminate(8);
-        try{
-        ContactAnalyzer FindContacts = new ContactAnalyzer();
-        FindContacts.findContacts();
-        progressBar.progress(1);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        CallLogAnalyzer FindCallLogs = new CallLogAnalyzer();
-        FindCallLogs.findCallLogs();
-        progressBar.progress(2);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        TextMessageAnalyzer FindTexts = new TextMessageAnalyzer();
-        FindTexts.findTexts();
-        progressBar.progress(3);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        TangoMessageAnalyzer FindTangoMessages = new TangoMessageAnalyzer();
-        FindTangoMessages.findTangoMessages();
-        progressBar.progress(4);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        WWFMessageAnalyzer FindWWFMessages = new WWFMessageAnalyzer();
-        FindWWFMessages.findWWFMessages();
-        progressBar.progress(5);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        GoogleMapLocationAnalyzer FindGoogleMapLocations = new GoogleMapLocationAnalyzer();
-        FindGoogleMapLocations.findGeoLocations();
-        progressBar.progress(6);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        BrowserLocationAnalyzer FindBrowserLocations = new BrowserLocationAnalyzer();
-        FindBrowserLocations.findGeoLocations();
-        progressBar.progress(7);
-        if (context.isJobCancelled())return IngestModule.ProcessResult.OK;
-        
-        CacheLocationAnalyzer FindCacheLocations = new CacheLocationAnalyzer();
-        FindCacheLocations.findGeoLocations();
-        progressBar.progress(8);
-        final IngestMessage inboxMsg = IngestMessage.createMessage(IngestMessage.MessageType.INFO, AndroidModuleFactory.getModuleName(),"hi");
-        services.postMessage(inboxMsg);
-     
-        }catch(Exception e){
-            final IngestMessage inboxMsg = IngestMessage.createMessage(IngestMessage.MessageType.INFO, AndroidModuleFactory.getModuleName(),"There were errors");
-             services.postMessage(inboxMsg);
-             return IngestModule.ProcessResult.ERROR;
+
+        try {
+            ContactAnalyzer FindContacts = new ContactAnalyzer();
+            FindContacts.findContacts();
+            progressBar.progress(1);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add("Error getting Contacts");
         }
-           return IngestModule.ProcessResult.OK;
+        try {
+            CallLogAnalyzer FindCallLogs = new CallLogAnalyzer();
+            FindCallLogs.findCallLogs();
+            progressBar.progress(2);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add("Error getting Call Logs");
+        }
+        try {
+            TextMessageAnalyzer FindTexts = new TextMessageAnalyzer();
+            FindTexts.findTexts();
+            progressBar.progress(3);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add("Error getting Text Messages");
+        }
+        try {
+            TangoMessageAnalyzer FindTangoMessages = new TangoMessageAnalyzer();
+            FindTangoMessages.findTangoMessages();
+            progressBar.progress(4);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add("Error getting Tango Messages");
+        }
+        try {
+            WWFMessageAnalyzer FindWWFMessages = new WWFMessageAnalyzer();
+            FindWWFMessages.findWWFMessages();
+            progressBar.progress(5);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add("Error getting Words with Friends Messages");
+        }
+        try {
+            GoogleMapLocationAnalyzer FindGoogleMapLocations = new GoogleMapLocationAnalyzer();
+            FindGoogleMapLocations.findGeoLocations();
+            progressBar.progress(6);
+            if (context.isJobCancelled()) {
+                return IngestModule.ProcessResult.OK;
+            }
+        } catch (Exception e) {
+            errors.add( "Error getting Google Map Locations");
+        }
+        try {
+            BrowserLocationAnalyzer FindBrowserLocations = new BrowserLocationAnalyzer();
+            FindBrowserLocations.findGeoLocations();
+            progressBar.progress(7);
+        } catch (Exception e) {
+            errors.add("Error getting Browser Locations");
+        }
+        if (context.isJobCancelled()) {
+            return IngestModule.ProcessResult.OK;
+        }
+        try {
+            CacheLocationAnalyzer FindCacheLocations = new CacheLocationAnalyzer();
+            FindCacheLocations.findGeoLocations();
+            progressBar.progress(8);
+        } catch (Exception e) {
+            errors.add("Error getting Cache Locations");
+        }
+
+        // create the final message for inbox
+        StringBuilder errorMessage = new StringBuilder();
+        String errorMsgSubject;
+        IngestMessage.MessageType msgLevel = IngestMessage.MessageType.INFO;
+        if (errors.isEmpty() == false) {
+            msgLevel = IngestMessage.MessageType.ERROR;
+            errorMessage.append("Errors were encountered");
+            for (String msg : errors) {
+                errorMessage.append("<li>").append(msg).append("</li>\n"); //NON-NLS
+            }
+            errorMessage.append("</ul>\n"); //NON-NLS
+
+            if (errors.size() == 1) {
+                errorMsgSubject =  "One error was found";
+            } else {
+                errorMsgSubject = "errors found: " +errors.size();
+            }
+        } else {
+            errorMessage.append( "No errors");
+            errorMsgSubject ="No errors";
+        }
+        final IngestMessage msg = IngestMessage.createMessage(msgLevel, AndroidModuleFactory.getModuleName(),"Ingest Finished");
+        services.postMessage(msg);
+
+        return IngestModule.ProcessResult.OK;
     }
 
     @Override
     public void shutDown(boolean ingestJobCancelled) {
- 
     }
-
-    
 }
