@@ -40,53 +40,10 @@ public class AndroidFIngestModuleTest {
     
     @Before
     public void setUp() {
-        String output = "";
-        String path = "C:\\Users\\tshahi\\Documents\\callogtest\\Export\\90-com.google.android.location\\files\\cache.cell";
-        File file = new File(path);
-
-
-        byte[] bytes;
-        try {
-            InputStream inputStream = new FileInputStream(file);
-            long length = file.length();
-            bytes = new byte[(int) 2]; // version
-            inputStream.read(bytes);
-            System.out.println(new BigInteger(bytes).intValue());
-            bytes = new byte[(int) 2];
-            inputStream.read(bytes); //number of location entries
-
-            System.out.println(new BigInteger(bytes).intValue());
-            int iterations = new BigInteger(bytes).intValue();
-            for (int i = 0; i < iterations; i++) { //loop through every entry
-                bytes = new byte[(int) 2];
-                inputStream.read(bytes);
-                bytes = new byte[(int) 1];
-                inputStream.read(bytes);
-                while (new BigInteger(bytes).intValue() != 0) //pass through non important values until the start of accuracy
-                {
-                    inputStream.read(bytes);
-                }
-                bytes = new byte[(int) 3];
-                inputStream.read(bytes);
-                System.out.println(new BigInteger(bytes).intValue());// accuracy
-                bytes = new byte[(int) 4];
-                inputStream.read(bytes);
-                System.out.println(new BigInteger(bytes).intValue()); //conf
-                bytes = new byte[(int) 8];
-                inputStream.read(bytes);
-                System.out.println(toDouble(bytes)); //lat
-                bytes = new byte[(int) 8];
-                inputStream.read(bytes);
-                System.out.println(toDouble(bytes)); //long
-                bytes = new byte[(int) 8];
-                inputStream.read(bytes);
-                System.out.println(new BigInteger(bytes).floatValue()); //time
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error is:" + e.getMessage());
-        }
-
+        String oranges;    
+        oranges = "asdf:adsf.adsf/asdfhsjdfdjfs:adsfadfs.asdfds/|\\%*:\"<>.";
+        String newString = oranges.replaceAll("[<>%|\"/:*\\\\]", "");
+        System.out.println(newString);
     }
     
     @After

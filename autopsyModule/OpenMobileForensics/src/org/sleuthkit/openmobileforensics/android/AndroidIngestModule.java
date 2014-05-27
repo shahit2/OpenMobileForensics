@@ -51,7 +51,7 @@ class AndroidIngestModule implements DataSourceIngestModule {
 
 
         ArrayList<String> errors = new ArrayList<>();
-        progressBar.switchToDeterminate(8);
+        progressBar.switchToDeterminate(9);
 
         try {
             ContactAnalyzer FindContacts = new ContactAnalyzer();
@@ -129,6 +129,13 @@ class AndroidIngestModule implements DataSourceIngestModule {
             progressBar.progress(8);
         } catch (Exception e) {
             errors.add("Error getting Cache Locations");
+        }
+        try {
+            KMLFileCreator KMLFileCreator = new KMLFileCreator();
+            KMLFileCreator.CreateKML();
+            progressBar.progress(9);
+        } catch (Exception e) {
+            errors.add("Error creating KML");
         }
 
         // create the final message for inbox

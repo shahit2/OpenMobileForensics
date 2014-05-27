@@ -101,6 +101,14 @@
                 <package>org.sqlite.util</package>
             </public-packages>
             <class-path-extension>
+                <runtime-relative-path>ext/jdom-2.0.5.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jdom-2.0.5.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jdom-2.0.5-contrib.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jdom-2.0.5-contrib.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/sqlite-jdbc4-3.8.2-SNAPSHOT.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/sqlite-jdbc4-3.8.2-SNAPSHOT.jar</binary-origin>
             </class-path-extension>
